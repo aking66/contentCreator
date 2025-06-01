@@ -1,0 +1,23 @@
+source .venv/bin/activate
+adk web
+
+AutoGen
+
+autogenstudio ui --port 8080
+python3 "autogen_demo copy 2.py"
+
+curl http://localhost:11434/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "qwen3:4b",
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant."
+            },
+            {
+                "role": "user",
+                "content": "Hello!"
+            }
+        ]
+    }'
