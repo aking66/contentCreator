@@ -1,0 +1,31 @@
+# Core Dependencies
+autogen-agentchat>=0.5.7
+autogen-ext[web-surfer]>=0.5.7
+openai>=1.0.0
+
+# Additional Dependencies
+playwright>=1.52.0
+pydantic>=2.11.5
+python-dotenv>=1.1.0
+
+# For PDF and Document Processing
+pdfminer-six>=20250506
+python-pptx>=1.0.2
+openpyxl>=3.1.5
+mammoth>=1.9.1
+
+# Web and Data Processing
+beautifulsoup4>=4.13.4
+lxml>=5.4.0
+pandas>=2.2.3
+
+# Audio Processing (if needed)
+pydub>=0.25.1
+
+# Azure Services (used by some AutoGen extensions)
+azure-ai-documentintelligence>=1.0.2
+azure-identity>=1.23.0
+
+# Development Tools
+jupyter>=1.0.0
+ipykernel>=6.0.0
