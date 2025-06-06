@@ -39,7 +39,7 @@ async def main() -> None:
     agent_team = RoundRobinGroupChat([web_surfer_agent], max_turns=3)
 
     # Run the team and stream messages to the console
-    stream = agent_team.run_stream(task=)
+    stream = agent_team.run_stream(task="Navigate to the AutoGen readme on GitHub need number fork.")
     await Console(stream)
     # Close the browser controlled by the agent
     await web_surfer_agent.close()

@@ -15,7 +15,7 @@ model_client = OpenAIChatCompletionClient(
             "structured_output": True
         },
         base_url="https://api.groq.com/openai/v1",
-        api_key="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",
+        api_key="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",
         
 )
 
@@ -25,14 +25,16 @@ async def main() -> None:
         name="MultimodalWebSurfer",
         model_client=model_client,
         headless=False,
-        start_page="https://www.google.com/",
+        start_page="https://github.com/microsoft/autogen",
     )
 
     # Define a team
     agent_team = RoundRobinGroupChat([web_surfer_agent], max_turns=3)
 
     # Run the team and stream messages to the console
-    stream = agent_team.run_stream(task="Could you please from google collect and share first 5 article links related to the latest Manus update?")
+    stream = agent_team.run_stream(
+        task="Retrieve the current number of forks for the AutoGen repository on GitHub. Please provide only the number, without any additional explanation."
+    )
     await Console(stream)
     # Close the browser controlled by the agent
     await web_surfer_agent.close()

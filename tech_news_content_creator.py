@@ -77,9 +77,9 @@ async def main() -> None:
     # Define the news sources to search
     news_sources = [
         "https://techcrunch.com/latest/",
-        "https://www.youtube.com/@Fireship",
-        "https://www.theverge.com/tech",
-        "https://arxiv.org/list/cs.AI/recent"
+        # "https://www.youtube.com/@Fireship",
+        # "https://www.theverge.com/tech",
+        # "https://arxiv.org/list/cs.AI/recent"
     ]
 
     # Create web surfer agent for direct source browsing
@@ -87,7 +87,7 @@ async def main() -> None:
         name="websurfer_agent",
         description="an agent that directly browses multiple tech news sources to find relevant articles",
         model_client=model_client,
-        headless=True,  # Set to True to hide the browser window
+        headless=False,  # Set to True to hide the browser window
         start_page=news_sources[0],  # Start with TechCrunch
     )
     
@@ -154,7 +154,7 @@ Your goal is to synthesize information from multiple sources into a single, cohe
             name="websurfer_agent",
             description="an agent that directly browses multiple tech news sources to find relevant articles",
             model_client=model_client,
-            headless=True,
+            headless=False,
             start_page=source
         )
         
