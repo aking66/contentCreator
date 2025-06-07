@@ -117,11 +117,6 @@ async def main():
         message="Fetch and show me the latest Arabic tech news"
     )
     
-    # Start the conversation
-    await user_proxy.a_initiate_chat(
-        news_assistant,
-        message=initial_message
-    )
 
 if __name__ == "__main__":
     asyncio.run(main())
