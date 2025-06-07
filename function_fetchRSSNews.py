@@ -3,6 +3,8 @@ from typing import List, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel, HttpUrl, Field
 from rss_feeds import RSS_FEEDS, get_feeds_by_category
+import pandas as pd
+import os
 
 class NewsItem(BaseModel):
     title: str = Field(default="")
@@ -72,27 +74,64 @@ async def fetch_rss_news(category: str, limit: int = None) -> List[Dict[str, Any
             
     return [news.model_dump() for news in all_news]
 
+
+def save_news_to_excel(news_data: List[Dict[str, Any]], category: str, output_dir: str = "news_data") -> str:
+    """
+    Save news data to an Excel file
+    
+    Args:
+        news_data (List[Dict[str, Any]]): List of news items
+        category (str): Category of news ('arabic', 'international', etc.)
+        output_dir (str): Directory to save the Excel file (default: 'news_data')
+        
+    Returns:
+        str: Path to the saved Excel file
+    """
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Create DataFrame from news data
+    df = pd.DataFrame(news_data)
+    
+    # Generate filename with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{category}_news_{timestamp}.xlsx"
+    filepath = os.path.join(output_dir, filename)
+    
+    # Save to Excel
+    df.to_excel(filepath, index=False)
+    return filepath
+
+
 if __name__ == "__main__":
     import asyncio
     
     async def main():
         # Test fetching international news with limit of 2 feeds
         print("Fetching international news...")
-        news = await fetch_rss_news(category="international", limit=2)
-        print(f"Found {len(news)} articles")
-        for item in news[:3]:  # Show first 3 articles
+        international_news = await fetch_rss_news(category="international", limit=2)
+        print(f"Found {len(international_news)} articles")
+        for item in international_news[:3]:  # Show first 3 articles
             print(f"\nTitle: {item['title']}")
             print(f"Link: {item['link']}")
             print(f"Published: {item['published']}")
         
+        # Save international news to Excel
+        excel_path = save_news_to_excel(international_news, "international")
+        print(f"\nSaved international news to: {excel_path}")
+        
         # Test fetching Arabic news
         print("\n\nFetching Arabic news...")
-        news = await fetch_rss_news(category="arabic", limit=2)
-        print(f"Found {len(news)} articles")
-        for item in news[:3]:  # Show first 3 articles
+        arabic_news = await fetch_rss_news(category="arabic", limit=2)
+        print(f"Found {len(arabic_news)} articles")
+        for item in arabic_news[:3]:  # Show first 3 articles
             print(f"\nTitle: {item['title']}")
             print(f"Link: {item['link']}")
             print(f"Published: {item['published']}")
+            
+        # Save Arabic news to Excel
+        excel_path = save_news_to_excel(arabic_news, "arabic")
+        print(f"\nSaved Arabic news to: {excel_path}")
     
     # Run the async main function
     asyncio.run(main())
