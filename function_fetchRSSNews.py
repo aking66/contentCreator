@@ -1,7 +1,8 @@
 import feedparser
-from typing import List
+from typing import List, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel, HttpUrl, Field
+from rss_feeds import RSS_FEEDS, get_feeds_by_category
 
 class NewsItem(BaseModel):
     title: str = Field(default="")
@@ -45,14 +46,53 @@ def FetchRSSNews(rss_url: str) -> List[NewsItem]:
         return []
 
 # Example usage
-if __name__ == "__main__":
-    # Test with Engadget RSS feed
-    rss_url = "https://www.theverge.com/rss/tech/index.xml"
-    news = FetchRSSNews(rss_url)
+async def fetch_rss_news(category: str, limit: int = None) -> List[Dict[str, Any]]:
+    """
+    Fetch news from RSS feeds based on category
     
-    print("\nLatest tech news from Engadget:")
-    for item in news[:3]:  # Show first 3 items
-        print(f"\nTitle: {item.title}")
-        print(f"Link: {item.link}")
-        print(f"Published: {item.published}")
-        print(f"Summary: {item.summary[:150]}...")
+    Args:
+        category (str): Category of news to fetch ('arabic', 'international', 'general', 'reddit', 'all')
+        limit (int, optional): Maximum number of feeds to process
+        
+    Returns:
+        List[Dict[str, Any]]: List of news items
+    """
+    feeds = get_feeds_by_category(category) if category != "all" else RSS_FEEDS
+    if limit:
+        feeds = feeds[:limit]
+        
+    all_news = []
+    for feed_url in feeds:
+        try:
+            news_items = FetchRSSNews(feed_url)
+            all_news.extend(news_items)
+        except Exception as e:
+            print(f"Error fetching from {feed_url}: {str(e)}")
+            continue
+            
+    return [news.model_dump() for news in all_news]
+
+if __name__ == "__main__":
+    import asyncio
+    
+    async def main():
+        # Test fetching international news with limit of 2 feeds
+        print("Fetching international news...")
+        news = await fetch_rss_news(category="international", limit=2)
+        print(f"Found {len(news)} articles")
+        for item in news[:3]:  # Show first 3 articles
+            print(f"\nTitle: {item['title']}")
+            print(f"Link: {item['link']}")
+            print(f"Published: {item['published']}")
+        
+        # Test fetching Arabic news
+        print("\n\nFetching Arabic news...")
+        news = await fetch_rss_news(category="arabic", limit=2)
+        print(f"Found {len(news)} articles")
+        for item in news[:3]:  # Show first 3 articles
+            print(f"\nTitle: {item['title']}")
+            print(f"Link: {item['link']}")
+            print(f"Published: {item['published']}")
+    
+    # Run the async main function
+    asyncio.run(main())
