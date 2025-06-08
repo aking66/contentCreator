@@ -108,30 +108,35 @@ if __name__ == "__main__":
     
     async def main():
         # Test fetching international news with limit of 2 feeds
-        print("Fetching international news...")
-        international_news = await fetch_rss_news(category="international", limit=2)
-        print(f"Found {len(international_news)} articles")
-        for item in international_news[:3]:  # Show first 3 articles
-            print(f"\nTitle: {item['title']}")
-            print(f"Link: {item['link']}")
-            print(f"Published: {item['published']}")
+        # print("Fetching international news...")
+        # international_news = await fetch_rss_news(category="international", limit=2)
+        # print(f"Found {len(international_news)} articles")
+        # for item in international_news[:3]:  # Show first 3 articles
+        #     print(f"\nTitle: {item['title']}")
+        #     print(f"Link: {item['link']}")
+        #     print(f"Published: {item['published']}")
         
-        # Save international news to Excel
-        excel_path = save_news_to_excel(international_news, "international")
-        print(f"\nSaved international news to: {excel_path}")
+        # # Save international news to Excel
+        # excel_path = save_news_to_excel(international_news, "international")
+        # print(f"\nSaved international news to: {excel_path}")
         
-        # Test fetching Arabic news
-        print("\n\nFetching Arabic news...")
-        arabic_news = await fetch_rss_news(category="arabic", limit=2)
-        print(f"Found {len(arabic_news)} articles")
-        for item in arabic_news[:3]:  # Show first 3 articles
-            print(f"\nTitle: {item['title']}")
-            print(f"Link: {item['link']}")
-            print(f"Published: {item['published']}")
+        # # Test fetching Arabic news
+        # print("\n\nFetching Arabic news...")
+        # arabic_news = await fetch_rss_news(category="arabic", limit=2)
+        # print(f"Found {len(arabic_news)} articles")
+        # for item in arabic_news[:3]:  # Show first 3 articles
+        #     print(f"\nTitle: {item['title']}")
+        #     print(f"Link: {item['link']}")
+        #     print(f"Published: {item['published']}")
             
-        # Save Arabic news to Excel
-        excel_path = save_news_to_excel(arabic_news, "arabic")
-        print(f"\nSaved Arabic news to: {excel_path}")
-    
+        all_news = await fetch_rss_news(category="all", limit=2)
+        print(f"Found {len(all_news)} articles")
+        for item in all_news[:3]:  # Show first 3 articles
+            print(f"\nTitle: {item['title']}")
+            print(f"Link: {item['link']}")
+            print(f"Published: {item['published']}")
+        # Save all news to Excel
+        excel_path = save_news_to_excel(all_news, "all")
+        print(f"\nSaved all news to: {excel_path}")
     # Run the async main function
     asyncio.run(main())
