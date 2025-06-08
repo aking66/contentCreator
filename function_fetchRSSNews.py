@@ -24,7 +24,17 @@ def FetchRSSNews(rss_url: str) -> List[NewsItem]:
     """
     try:
         # Parse the RSS feed
-        feed = feedparser.parse(rss_url)
+        try:
+            import requests
+            resp = requests.get(rss_url, headers={'User-Agent': 'Mozilla/5.0'})
+            feed = feedparser.parse(resp.text)
+            print('DEBUG FEED:', feed)
+            print('DEBUG ENTRIES:', feed.entries)
+        except ImportError:
+            print('ERROR: requests library is not installed!')
+            feed = feedparser.parse(rss_url)
+            print('DEBUG FEED:', feed)
+            print('DEBUG ENTRIES:', feed.entries)
         
         # Extract news items
         news_items = []
@@ -66,6 +76,7 @@ async def fetch_rss_news(category: str, limit: int = None) -> List[Dict[str, Any
     all_news = []
     for feed_url in feeds:
         try:
+            print(f"Fetching from {feed_url}")
             news_items = FetchRSSNews(feed_url)
             all_news.extend(news_items)
         except Exception as e:
@@ -129,14 +140,24 @@ if __name__ == "__main__":
         #     print(f"Link: {item['link']}")
         #     print(f"Published: {item['published']}")
             
-        all_news = await fetch_rss_news(category="all", limit=2)
-        print(f"Found {len(all_news)} articles")
-        for item in all_news[:3]:  # Show first 3 articles
+        # all_news = await fetch_rss_news(category="all", limit=2)
+        # print(f"Found {len(all_news)} articles")
+        # for item in all_news[:3]:  # Show first 3 articles
+        #     print(f"\nTitle: {item['title']}")
+        #     print(f"Link: {item['link']}")
+        #     print(f"Published: {item['published']}")
+        # # Save all news to Excel
+        # excel_path = save_news_to_excel(all_news, "all")
+        # print(f"\nSaved all news to: {excel_path}")
+
+        reddit_news = await fetch_rss_news(category="reddit", limit=2)
+        print(f"Found {len(reddit_news)} articles")
+        for item in reddit_news[:13]:  # Show first 3 articles
             print(f"\nTitle: {item['title']}")
             print(f"Link: {item['link']}")
             print(f"Published: {item['published']}")
         # Save all news to Excel
-        excel_path = save_news_to_excel(all_news, "all")
-        print(f"\nSaved all news to: {excel_path}")
+        excel_path = save_news_to_excel(reddit_news, "reddit")
+        print(f"\nSaved reddit news to: {excel_path}")
     # Run the async main function
     asyncio.run(main())
