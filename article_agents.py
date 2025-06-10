@@ -4,6 +4,35 @@ from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_ext.agents.web_surfer import MultimodalWebSurfer
 from autogen_agentchat.agents import AssistantAgent
+from duckduckgo_search import DDGS
+from typing import List
+from dataclasses import dataclass
+
+@dataclass
+class SearchResult:
+    title: str
+    link: str
+    snippet: str
+    published: str
+
+class SearchAgent:
+    def __init__(self):
+        self.ddgs = DDGS()
+    
+    def search_topic(self, query: str, max_results: int = 5) -> List[SearchResult]:
+        results = []
+        try:
+            for r in self.ddgs.news(query, max_results=max_results):
+                result = SearchResult(
+                    title=r.get('title', ''),
+                    link=r.get('url', ''),
+                    snippet=r.get('excerpt', ''),
+                    published=r.get('published', '')
+                )
+                results.append(result)
+        except Exception as e:
+            print(f"Error during search: {str(e)}")
+        return results
 
 model_client = OpenAIChatCompletionClient(
         model="meta-llama/llama-4-scout-17b-16e-instruct",
@@ -20,29 +49,55 @@ model_client = OpenAIChatCompletionClient(
 )
 
 async def main() -> None:
+    # Initialize the search agent
+    search_agent = SearchAgent()
+    
+    # Search for relevant articles
+    search_results = search_agent.search_topic("The Illusion of Thinking", max_results=3)
+    
     # Define the web surfer agent
     web_surfer_agent = MultimodalWebSurfer(
         name="WebSurfer",
         model_client=model_client,
         headless=False,
-        start_page="https://www.msn.com/en-us/news/technology/the-illusion-of-thinking-apple-research-finds-ai-models-collapse-and-give-up-with-hard-puzzles/ar-AA1GnC2a",
+        start_page=search_results[0].link if search_results else "https://www.msn.com",
     )
 
-    # Define the summarizer agent
+    # Define the summarizer agent with enhanced system message
     summarizer_agent = AssistantAgent(
         name="Summarizer",
         model_client=model_client,
-        system_message="You are a skilled content summarizer. When you receive web content from the WebSurfer agent, analyze it and provide a clear, concise summary of the main points and key information."
+        system_message="""You are a skilled content analyzer and summarizer. Your tasks are:
+1. Analyze and summarize the main content from the WebSurfer agent
+2. If multiple articles are provided, compare and contrast their key points
+3. Highlight any conflicting information or different perspectives
+4. Provide a concise, well-structured summary with key findings
+
+Format your response using markdown for better readability."""
     )
 
     # Define a team with both agents
-    agent_team = RoundRobinGroupChat([web_surfer_agent, summarizer_agent], max_turns=4)
+    agent_team = RoundRobinGroupChat([web_surfer_agent, summarizer_agent], max_turns=6)
+    
+    # Print found articles
+    print("\nFound related articles:")
+    for result in search_results:
+        print(f"\nTitle: {result.title}")
+        print(f"Link: {result.link}")
+        print(f"Published: {result.published}")
+        print("-" * 50)
+        
+        # Update web_surfer_agent's start page to current article
+        web_surfer_agent._page = None  # Reset page to allow new navigation
+        web_surfer_agent.start_page = result.link
+        
+        # Run the team and stream messages to the console
+        print(f"\nAnalyzing article: {result.title}")
+        stream = agent_team.run_stream(
+            task=f"Please visit {result.link} and provide a detailed summary of the article. Include: main points, key findings, and any significant quotes. Published date: {result.published}"
+        )
+        await Console(stream)
 
-    # Run the team and stream messages to the console
-    stream = agent_team.run_stream(
-        task="Please read and provide a detailed summary of the article about AI models and hard puzzles."
-    )
-    await Console(stream)
     # Close the browser controlled by the agent
     await web_surfer_agent.close()
 
