@@ -2,6 +2,7 @@
 autogen-agentchat>=0.5.7
 autogen-ext[web-surfer]>=0.5.7
 openai>=1.0.0
+duckduckgo-search>=4.1.1
 
 # Additional Dependencies
 playwright>=1.52.0
