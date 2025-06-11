@@ -101,7 +101,7 @@ async def main() -> None:
     
     # Search for relevant articles with a configurable query
     search_query = "The Illusion of Thinking"  # You can change this to any topic
-    max_results = 2  # Reduced from 3 to avoid rate limits
+    max_results = 4  # Reduced from 3 to avoid rate limits
     logging.info(f"Beginning search for topic: '{search_query}' with max_results={max_results}")
     search_results = search_agent.search_topic(search_query, max_results=max_results)
     

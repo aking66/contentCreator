@@ -1,7 +1,8 @@
-from typing import List, Dict
 from datetime import datetime
+import os
+from typing import List, Dict, Optional
 
-def save_to_markdown(articles_data: List[Dict], filename: str = None) -> str:
+def save_to_markdown(articles_data: List[Dict], filename: Optional[str] = None) -> str:
     """
     Save article data to a markdown file
     
@@ -13,12 +14,21 @@ def save_to_markdown(articles_data: List[Dict], filename: str = None) -> str:
     Returns:
     - The filename used to save the data
     """
+    # Create article_summaries directory if it doesn't exist
+    summaries_dir = "article_summaries"
+    if not os.path.exists(summaries_dir):
+        os.makedirs(summaries_dir)
+        
     if filename is None:
         # Create a timestamped filename
         now = datetime.now()
         date_str = now.strftime("%Y%m%d_%H%M%S")
-        filename = f"articles_{date_str}.md"
+        filename = os.path.join(summaries_dir, f"articles_{date_str}.md")
     
+    # Make sure we have the full path if a custom filename was provided
+    if not os.path.dirname(filename):
+        filename = os.path.join(summaries_dir, filename)
+        
     with open(filename, 'w', encoding='utf-8') as f:
         f.write('# Collected Articles Summary\n\n')
         f.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
