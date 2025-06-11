@@ -22,14 +22,18 @@ class SearchAgent:
     def search_topic(self, query: str, max_results: int = 5) -> List[SearchResult]:
         results = []
         try:
-            for r in self.ddgs.news(query, max_results=max_results):
-                result = SearchResult(
-                    title=r.get('title', ''),
-                    link=r.get('url', ''),
-                    snippet=r.get('excerpt', ''),
-                    published=r.get('published', '')
-                )
-                results.append(result)
+            for r in self.ddgs.news(query, max_results=max_results * 2):  # Fetch more results since we'll filter some out
+                url = r.get('url', '')
+                if 'msn.com' not in url.lower():  # Filter out msn.com domains
+                    result = SearchResult(
+                        title=r.get('title', ''),
+                        link=url,
+                        snippet=r.get('excerpt', ''),
+                        published=r.get('published', '')
+                    )
+                    results.append(result)
+                    if len(results) >= max_results:  # Stop once we have enough valid results
+                        break
         except Exception as e:
             print(f"Error during search: {str(e)}")
         return results
